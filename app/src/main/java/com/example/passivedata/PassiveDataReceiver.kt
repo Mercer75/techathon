@@ -42,7 +42,6 @@ class PassiveDataReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val state = PassiveMonitoringUpdate.fromIntent(intent) ?: return
 
-
         val item: DataStore = DataStore.builder()
             .heartRate(getLatestData("heart", state))
             .location(getLocation(state))
@@ -54,6 +53,9 @@ class PassiveDataReceiver : BroadcastReceiver() {
             { success -> Log.i("Amplify", "Saved item: " + success.item().id) },
             { error -> Log.e("Amplify", "Could not save item to DataStore", error) }
         )
+
+        //Notification
+        //if no response. return data to aws.
 
         runBlocking {
             repository.storeLatestHeartRate(item.heartRate)
