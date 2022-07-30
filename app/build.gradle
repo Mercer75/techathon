@@ -43,6 +43,11 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+        // Support for Java 8 features
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+
     }
     kotlinOptions { jvmTarget = '1.8' }
 }
@@ -79,4 +84,16 @@ dependencies {
 
     // Material
     implementation 'com.google.android.material:material:1.4.0'
+
+    //AWS
+    implementation 'com.amplifyframework:aws-api:1.36.2'
+    implementation 'com.amplifyframework:aws-datastore:1.36.2'
+
+    // Amplify plugins
+    implementation 'com.amplifyframework:core:1.6.5'
+    implementation 'com.amplifyframework:aws-api:1.6.5'
+    implementation 'com.amplifyframework:aws-datastore:1.6.5'
+
+    // Support for Java 8 features
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.10'
 }

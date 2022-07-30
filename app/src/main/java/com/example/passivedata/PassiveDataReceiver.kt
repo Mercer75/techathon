@@ -23,6 +23,9 @@ import android.util.Log
 import androidx.health.services.client.data.DataType
 import androidx.health.services.client.data.HrAccuracy
 import androidx.health.services.client.data.PassiveMonitoringUpdate
+import com.amplifyframework.core.Amplify
+import com.amplifyframework.datastore.generated.model.DataStore
+import com.amplifyframework.datastore.generated.model.Location
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
@@ -62,6 +65,40 @@ class PassiveDataReceiver : BroadcastReceiver() {
 
         val latestHeartRate = latestDataPoint.value.asDouble() // HEART_RATE_BPM is a Float type.
         Log.d(TAG, "Received latest heart rate in background: $latestHeartRate")
+
+        // Get the most recent spo2 measurement.
+        val latestDataPoint2 = state.dataPoints
+            // dataPoints can have multiple types (e.g. if the app registered for multiple types).
+            .filter { it.dataType == DataType.SPO2 }
+            // where accuracy information is available, only show readings that are of medium or
+            // high accuracy. (Where accuracy information isn't available, show the reading if it is
+            // a positive value).
+            .filter {
+                it.accuracy == null ||
+                        setOf(
+                            HrAccuracy.SensorStatus.ACCURACY_MEDIUM,
+                            HrAccuracy.SensorStatus.ACCURACY_HIGH
+                        ).contains((it.accuracy as HrAccuracy).sensorStatus)
+            }
+            .filter {
+                it.value.asDouble() > 0
+            }
+            // HEART_RATE_BPM is a SAMPLE type, so start and end times are the same.
+            .maxByOrNull { it.endDurationFromBoot }
+        // If there were no data points, the previous function returns null.
+            ?: return
+
+        val item: DataStore = DataStore.builder()
+            .heartRate(latestHeartRate)
+            .location(latestDataPoint.)
+            .spo2(123.45)
+            .vo2(123.45)
+            .build()
+        Amplify.DataStore.save(
+            item,
+            { success -> Log.i("Amplify", "Saved item: " + success.item().name) },
+            { error -> Log.e("Amplify", "Could not save item to DataStore", error) }
+        )
 
         runBlocking {
             repository.storeLatestHeartRate(latestHeartRate)
