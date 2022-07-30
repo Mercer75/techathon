@@ -52,15 +52,15 @@ class MainActivity : AppCompatActivity() {
             Amplify.addPlugin(AWSApiPlugin())
             Amplify.addPlugin(AWSDataStorePlugin())
             Amplify.configure(applicationContext)
-            Log.i("Tutorial", "Initialized Amplify")
+            Log.i("Amplify", "Initialized Amplify")
         } catch (failure: AmplifyException) {
-            Log.e("Tutorial", "Could not initialize Amplify", failure)
+            Log.e("Amplify", "Could not initialize Amplify", failure)
         }
         Amplify.DataStore.observe(DataStore::class.java,
-            { Log.i("Tutorial", "Observation began.") },
-            { Log.i("Tutorial", it.item().toString()) },
-            { Log.e("Tutorial", "Observation failed.", it) },
-            { Log.i("Tutorial", "Observation complete.") }
+            { Log.i("Amplify", "Observation began.") },
+            { Log.i("Amplify", it.item().toString()) },
+            { Log.e("Amplify", "Observation failed.", it) },
+            { Log.i("Amplify", "Observation complete.") }
         )
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -97,7 +97,12 @@ class MainActivity : AppCompatActivity() {
         }
         lifecycleScope.launchWhenStarted {
             viewModel.latestHeartRate.collect {
-                binding.lastMeasuredValue.text = it.toString()
+                binding.bpmValue.text = it.toString()
+            }
+        }
+        lifecycleScope.launchWhenStarted {
+            viewModel.latestSpo2.collect {
+                binding.spo2Value.text = it.toString()
             }
         }
         lifecycleScope.launchWhenStarted {
@@ -120,7 +125,7 @@ class MainActivity : AppCompatActivity() {
         (uiState is UiState.HeartRateAvailable).let {
             binding.enablePassiveData.isVisible = it
             binding.lastMeasuredLabel.isVisible = it
-            binding.lastMeasuredValue.isVisible = it
+            binding.bpmValue.isVisible = it
             binding.heart.isVisible = it
         }
     }

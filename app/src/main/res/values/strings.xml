@@ -16,8 +16,10 @@
   -->
 
 <resources>
-    <string name="app_name">Passive Data Sample</string>
+    <string name="app_name">Health Tracker</string>
     <string name="enable">Enable</string>
     <string name="last_measured">Last measured:</string>
+    <string name="spo2">SPO2 measured:</string>
+    <string name="activity">Current Activity:</string>
     <string name="not_available">Not available on this device</string>
 </resources>

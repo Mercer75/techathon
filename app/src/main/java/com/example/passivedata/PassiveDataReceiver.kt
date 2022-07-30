@@ -20,12 +20,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import androidx.health.services.client.data.DataType
-import androidx.health.services.client.data.HrAccuracy
-import androidx.health.services.client.data.PassiveMonitoringUpdate
+import androidx.health.services.client.data.*
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.generated.model.DataStore
 import com.amplifyframework.datastore.generated.model.Location
+import com.example.passivedata.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
@@ -54,8 +53,15 @@ class PassiveDataReceiver : BroadcastReceiver() {
             { error -> Log.e("Amplify", "Could not save item to DataStore", error) }
         )
 
+
         //Notification
         //if no response. return data to aws.
+//        if (state.userActivityInfoUpdates.isNotEmpty()
+//            && state.userActivityInfoUpdates[0].userActivityState !=
+//            UserActivityState.USER_ACTIVITY_EXERCISE &&
+//            item.heartRate > 80 ) {
+//
+//        }
 
         runBlocking {
             repository.storeLatestHeartRate(item.heartRate)
