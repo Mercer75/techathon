@@ -16,10 +16,15 @@
 
 package com.example.passivedata
 
+import android.app.Notification
+import android.app.Notification.EXTRA_NOTIFICATION_ID
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.provider.Settings.Global.getString
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import androidx.health.services.client.data.*
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.generated.model.DataStore
@@ -54,14 +59,11 @@ class PassiveDataReceiver : BroadcastReceiver() {
         )
 
 
+
+
         //Notification
         //if no response. return data to aws.
-//        if (state.userActivityInfoUpdates.isNotEmpty()
-//            && state.userActivityInfoUpdates[0].userActivityState !=
-//            UserActivityState.USER_ACTIVITY_EXERCISE &&
-//            item.heartRate > 80 ) {
-//
-//        }
+        val notification = getNotification(item, state)
 
         runBlocking {
             repository.storeLatestHeartRate(item.heartRate)
@@ -133,4 +135,32 @@ class PassiveDataReceiver : BroadcastReceiver() {
             .build()
     }
 
+    private fun getNotification (item: DataStore, state: PassiveMonitoringUpdate): String {
+
+        if (state.userActivityInfoUpdates.isNotEmpty()
+            && (state.userActivityInfoUpdates[0].userActivityState ==
+                    UserActivityState.USER_ACTIVITY_ASLEEP ||
+                    state.userActivityInfoUpdates[0].userActivityState ==
+                    UserActivityState.USER_ACTIVITY_PASSIVE)
+            && item.heartRate !in 55.0..88.0
+        ) {
+            return "We detected anomalies in your health data.\n" +
+                    "Do you require any assistance?"
+        }
+
+        if (item.spo2 < 85.0) {
+            return "We detected anomalies in your health data that may be extremely dangerous.\n" +
+                    "Do you require any assistance?"
+        }
+
+        if (state.userActivityInfoUpdates.isNotEmpty() &&
+            state.userActivityInfoUpdates[0].userActivityState ==
+            UserActivityState.USER_ACTIVITY_EXERCISE &&
+                item.heartRate !in 80.0..198.0) {
+            return "We detected anomalies in your health data.\n" +
+                    "Do you require any assistance?"
+        }
+
+        return ""
+    }
 }
