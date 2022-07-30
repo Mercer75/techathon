@@ -41,35 +41,37 @@ class PassiveDataReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val state = PassiveMonitoringUpdate.fromIntent(intent) ?: return
-        // Get the most recent heart rate measurement.
+
+
+        val item: DataStore = DataStore.builder()
+            .heartRate(getLatestData("heart", state))
+            .location(getLocation(state))
+            .spo2(getLatestData("spo2", state))
+            .vo2(getLatestData("vo2", state))
+            .build()
+        Amplify.DataStore.save(
+            item,
+            { success -> Log.i("Amplify", "Saved item: " + success.item().id) },
+            { error -> Log.e("Amplify", "Could not save item to DataStore", error) }
+        )
+
+        runBlocking {
+            repository.storeLatestHeartRate(item.heartRate)
+        }
+    }
+
+    private fun getLatestData(dataType: String, state: PassiveMonitoringUpdate): Double {
+
+        val data = when (dataType) {
+            "heart" -> DataType.HEART_RATE_BPM
+            "spo2" -> DataType.SPO2
+            else -> DataType.VO2
+        }
+
+        // Get the most recent measurement.
         val latestDataPoint = state.dataPoints
             // dataPoints can have multiple types (e.g. if the app registered for multiple types).
-            .filter { it.dataType == DataType.HEART_RATE_BPM }
-            // where accuracy information is available, only show readings that are of medium or
-            // high accuracy. (Where accuracy information isn't available, show the reading if it is
-            // a positive value).
-            .filter {
-                it.accuracy == null ||
-                setOf(
-                    HrAccuracy.SensorStatus.ACCURACY_MEDIUM,
-                    HrAccuracy.SensorStatus.ACCURACY_HIGH
-                ).contains((it.accuracy as HrAccuracy).sensorStatus)
-            }
-            .filter {
-                it.value.asDouble() > 0
-            }
-            // HEART_RATE_BPM is a SAMPLE type, so start and end times are the same.
-            .maxByOrNull { it.endDurationFromBoot }
-        // If there were no data points, the previous function returns null.
-            ?: return
-
-        val latestHeartRate = latestDataPoint.value.asDouble() // HEART_RATE_BPM is a Float type.
-        Log.d(TAG, "Received latest heart rate in background: $latestHeartRate")
-
-        // Get the most recent spo2 measurement.
-        val latestDataPoint2 = state.dataPoints
-            // dataPoints can have multiple types (e.g. if the app registered for multiple types).
-            .filter { it.dataType == DataType.SPO2 }
+            .filter { it.dataType == data }
             // where accuracy information is available, only show readings that are of medium or
             // high accuracy. (Where accuracy information isn't available, show the reading if it is
             // a positive value).
@@ -83,25 +85,44 @@ class PassiveDataReceiver : BroadcastReceiver() {
             .filter {
                 it.value.asDouble() > 0
             }
-            // HEART_RATE_BPM is a SAMPLE type, so start and end times are the same.
+            // Data is a SAMPLE type, so start and end times are the same.
             .maxByOrNull { it.endDurationFromBoot }
         // If there were no data points, the previous function returns null.
-            ?: return
+            ?: return 0.0
 
-        val item: DataStore = DataStore.builder()
-            .heartRate(latestHeartRate)
-            .location(latestDataPoint.)
-            .spo2(123.45)
-            .vo2(123.45)
-            .build()
-        Amplify.DataStore.save(
-            item,
-            { success -> Log.i("Amplify", "Saved item: " + success.item().name) },
-            { error -> Log.e("Amplify", "Could not save item to DataStore", error) }
-        )
-
-        runBlocking {
-            repository.storeLatestHeartRate(latestHeartRate)
-        }
+        return latestDataPoint.value.asDouble()
+//        Log.d(TAG, "Received latest heart rate in background: $latestHeartRate")
     }
+
+    private fun getLocation(state: PassiveMonitoringUpdate): Location {
+
+
+        // Get the most recent measurement.
+        val latestDataPoint = state.dataPoints
+            // dataPoints can have multiple types (e.g. if the app registered for multiple types).
+            .filter { it.dataType == DataType.LOCATION }
+            // where accuracy information is available, only show readings that are of medium or
+            // high accuracy. (Where accuracy information isn't available, show the reading if it is
+            // a positive value).
+            .filter {
+                it.accuracy == null ||
+                        setOf(
+                            HrAccuracy.SensorStatus.ACCURACY_MEDIUM,
+                            HrAccuracy.SensorStatus.ACCURACY_HIGH
+                        ).contains((it.accuracy as HrAccuracy).sensorStatus)
+            }
+            .filter {
+                it.value.asDouble() > 0
+            }
+            // Data is a SAMPLE type, so start and end times are the same.
+            .maxByOrNull { it.endDurationFromBoot }
+        // If there were no data points, the previous function returns null.
+            ?: return Location.builder().build()
+
+        return Location.builder()
+            .latitude(latestDataPoint.value.asDoubleArray()[0])
+            .latitude(latestDataPoint.value.asDoubleArray()[1])
+            .build()
+    }
+
 }

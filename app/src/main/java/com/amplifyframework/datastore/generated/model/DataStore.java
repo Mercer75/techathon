@@ -2,9 +2,7 @@ package com.amplifyframework.datastore.generated.model;
 
 import com.amplifyframework.core.model.temporal.Temporal;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.Objects;
 
 import androidx.core.util.ObjectsCompat;
 
@@ -12,7 +10,6 @@ import com.amplifyframework.core.model.AuthStrategy;
 import com.amplifyframework.core.model.Model;
 import com.amplifyframework.core.model.ModelOperation;
 import com.amplifyframework.core.model.annotations.AuthRule;
-import com.amplifyframework.core.model.annotations.Index;
 import com.amplifyframework.core.model.annotations.ModelConfig;
 import com.amplifyframework.core.model.annotations.ModelField;
 import com.amplifyframework.core.model.query.predicate.QueryField;
@@ -31,10 +28,10 @@ public final class DataStore implements Model {
   public static final QueryField SPO2 = field("DataStore", "SPO2");
   public static final QueryField VO2 = field("DataStore", "VO2");
   private final @ModelField(targetType="ID", isRequired = true) String id;
-  private final @ModelField(targetType="Float") Double HEART_RATE;
-  private final @ModelField(targetType="Location") Location LOCATION;
-  private final @ModelField(targetType="Float") Double SPO2;
-  private final @ModelField(targetType="Float") Double VO2;
+  private final @ModelField(targetType="Float") Double heartRate;
+  private final @ModelField(targetType="Location") Location location;
+  private final @ModelField(targetType="Float") Double spo2;
+  private final @ModelField(targetType="Float") Double vo2;
   private @ModelField(targetType="AWSDateTime", isReadOnly = true) Temporal.DateTime createdAt;
   private @ModelField(targetType="AWSDateTime", isReadOnly = true) Temporal.DateTime updatedAt;
   public String getId() {
@@ -42,19 +39,19 @@ public final class DataStore implements Model {
   }
   
   public Double getHeartRate() {
-      return HEART_RATE;
+      return heartRate;
   }
   
   public Location getLocation() {
-      return LOCATION;
+      return location;
   }
   
   public Double getSpo2() {
-      return SPO2;
+      return spo2;
   }
   
   public Double getVo2() {
-      return VO2;
+      return vo2;
   }
   
   public Temporal.DateTime getCreatedAt() {
@@ -67,10 +64,10 @@ public final class DataStore implements Model {
   
   private DataStore(String id, Double HEART_RATE, Location LOCATION, Double SPO2, Double VO2) {
     this.id = id;
-    this.HEART_RATE = HEART_RATE;
-    this.LOCATION = LOCATION;
-    this.SPO2 = SPO2;
-    this.VO2 = VO2;
+    this.heartRate = HEART_RATE;
+    this.location = LOCATION;
+    this.spo2 = SPO2;
+    this.vo2 = VO2;
   }
   
   @Override
@@ -144,10 +141,10 @@ public final class DataStore implements Model {
   
   public CopyOfBuilder copyOfBuilder() {
     return new CopyOfBuilder(id,
-      HEART_RATE,
-      LOCATION,
-      SPO2,
-      VO2);
+            heartRate,
+            location,
+            spo2,
+            vo2);
   }
   public interface BuildStep {
     DataStore build();
