@@ -46,6 +46,12 @@ class PassiveDataRepository @Inject constructor(
         prefs[LATEST_HEART_RATE] ?: 0.0
     }
 
+    val latestSPO2: Flow<Double> = dataStore.data.map { prefs ->
+        prefs[LATEST_SPO2] ?: 0.0
+    }
+
+
+
     suspend fun storeLatestHeartRate(heartRate: Double) {
         dataStore.edit { prefs ->
             prefs[LATEST_HEART_RATE] = heartRate
@@ -56,5 +62,6 @@ class PassiveDataRepository @Inject constructor(
         const val PREFERENCES_FILENAME = "passive_data_prefs"
         private val PASSIVE_DATA_ENABLED = booleanPreferencesKey("passive_data_enabled")
         private val LATEST_HEART_RATE = doublePreferencesKey("latest_heart_rate")
+        private val LATEST_SPO2 = doublePreferencesKey("latest_spo2")
     }
 }

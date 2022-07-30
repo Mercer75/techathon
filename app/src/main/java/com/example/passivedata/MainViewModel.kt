@@ -41,6 +41,7 @@ class MainViewModel @Inject constructor(
 
     val passiveDataEnabled: Flow<Boolean>
     val latestHeartRate = repository.lastestHeartRate
+    val latestSpo2 = repository.latestSPO2
 
     init {
         // Check that the device has the heart rate capability and progress to the next state
