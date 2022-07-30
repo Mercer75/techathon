@@ -25,8 +25,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.amplifyframework.AmplifyException
+import com.amplifyframework.api.aws.AWSApiPlugin
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.AWSDataStorePlugin
+import com.amplifyframework.datastore.generated.model.DataStore
 import com.example.passivedata.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -47,13 +49,19 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         try {
-            //Amplify.addPlugin(AWSApiPlugin()) // UNCOMMENT this line once backend is deployed
+            Amplify.addPlugin(AWSApiPlugin())
             Amplify.addPlugin(AWSDataStorePlugin())
             Amplify.configure(applicationContext)
-            Log.i("Amplify", "Initialized Amplify")
-        } catch (e: AmplifyException) {
-            Log.e("Amplify", "Could not initialize Amplify", e)
+            Log.i("Tutorial", "Initialized Amplify")
+        } catch (failure: AmplifyException) {
+            Log.e("Tutorial", "Could not initialize Amplify", failure)
         }
+        Amplify.DataStore.observe(DataStore::class.java,
+            { Log.i("Tutorial", "Observation began.") },
+            { Log.i("Tutorial", it.item().toString()) },
+            { Log.e("Tutorial", "Observation failed.", it) },
+            { Log.i("Tutorial", "Observation complete.") }
+        )
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
